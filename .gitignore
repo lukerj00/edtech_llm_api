@@ -1,0 +1,6 @@
+.DS_Store
+.dev/
+__pycache__/
+README.md
+instruction_texts.py
+/uploaded_files/

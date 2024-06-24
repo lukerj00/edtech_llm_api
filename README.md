@@ -32,7 +32,7 @@ Optional fields:
 Example cURL request (see example_files):
 
 ```
-curl -X POST 'http://localhost:5000/api/feedback' -H 'Content-Type: multipart/form-data' -F 'assignment_id=123' -F 'assignment_title=Explain two consequences of the Soviet invasion of Afghanistan' -F 'subject=History' -F 'qualification=GCSE' -F 'submission=@example_files/example-submission.pdf' -F 'mark_scheme=@example_files/example-ms.pdf'
+curl -X POST 'http://127.0.0.1:5000/api/feedback' -H 'Content-Type: multipart/form-data' -F 'assignment_id=123' -F 'assignment_title=Explain two consequences of the Soviet invasion of Afghanistan' -F 'subject=history' -F 'qualification=GCSE' -F 'submission=@example_files/example-submission.pdf' -F 'model=openai' -F 'mark_scheme=@example_files/example-ms.pdf'
 ```
 
 The API will return a JSON response with feedback categorized into SPaG, historical accuracy, overall comments, and marking, eg:

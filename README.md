@@ -29,10 +29,10 @@ Optional fields:
 - `max_completion_tokens`: Maximum tokens for LLM response. May fail if this is set to low due to JSON parsing errors (default: 1000)
 - `temperature`: LLM temperature setting. Should mostly be kept at 1 but left optional for tinkering (default: 1.0)
 
-Example cURL request:
+Example cURL request (see example_files):
 
 ```
-curl -X POST 'http://localhost:5000/api/feedback' -H 'Content-Type: multipart/form-data' -F 'assignment_id=123' -F 'assignment_title=World War II Essay' -F 'subject=History' -F 'qualification=A-level' -F 'submission=@example_files/example-submission.pdf' -F 'mark_scheme=@example_files/example-ms.pdf'
+curl -X POST 'http://localhost:5000/api/feedback' -H 'Content-Type: multipart/form-data' -F 'assignment_id=123' -F 'assignment_title=Explain two consequences of the Soviet invasion of Afghanistan' -F 'subject=History' -F 'qualification=GCSE' -F 'submission=@example_files/example-submission.pdf' -F 'mark_scheme=@example_files/example-ms.pdf'
 ```
 
 The API will return a JSON response with feedback categorized into SPaG, historical accuracy, overall comments, and marking, eg:
@@ -54,13 +54,13 @@ The API will return a JSON response with feedback categorized into SPaG, histori
 Each feedback group has output formatted slightly differently depending (eg different null fields) depending on its intended use on frontend.
 
 The API is still in development, so there are some missing features:
--Other model options, eg anthropic's claude
--Highlighting rewarded sections for the overall_feedback/marking fields
+- Other model options, eg anthropic's claude
+- Highlighting rewarded sections for the overall_feedback/marking fields
 
 and some known bugs:
--Incorrect start/end indexes in the output JSON, due to inconsistencies with how strings are represented/parses at different stages in the process (eg escape characters causing problems). This can be observed from testing with highlight_text.py
--LLM hallucinations, eg outputting 'incorrect' passages slightly differently to how they appeared in the original submission
--Occasional 403 forbidden requests, usually fixed by starting the localhost server
--Occasional OpenAIError errors when the servers are having issues
+- Incorrect start/end indexes in the output JSON, due to inconsistencies with how strings are represented/parses at different stages in the process (eg escape characters causing problems). This can be observed from testing with highlight_text.py
+- LLM hallucinations, eg outputting 'incorrect' passages slightly differently to how they appeared in the original submission
+- Occasional 403 forbidden requests, usually fixed by starting the localhost server
+- Occasional OpenAIError errors when the servers are having issues
 
 Please submit issues for any other bugs, thanks.

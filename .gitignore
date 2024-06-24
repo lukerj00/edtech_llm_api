@@ -1,6 +1,5 @@
 .DS_Store
-.dev/
+.dev_venv/
 __pycache__/
-README.md
 instruction_texts.py
 /uploaded_files/

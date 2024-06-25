@@ -14,11 +14,12 @@ class OpenAIHandler:
     def generate_feedback(self, assignment_id: str, assignment_title: str, subject: str, 
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
+        print('assistant_id:', assignment_id)
         try:
             assistant = self._get_or_create_assistant(assignment_id, assignment_title, subject, qualification, mark_scheme, temperature)
-            thread = self._create_thread(submission)
+            thread, submission = self._init_thread(submission, assistant.id, max_completion_tokens)
             
-            corrections = []
+            feedback = []
             for category, message in self._get_feedback_messages(qualification, subject).items():
                 run = self._create_and_poll_run(thread.id, assistant.id, message, max_completion_tokens)
                 print(f'{category} query status:', run.status)
@@ -26,9 +27,13 @@ class OpenAIHandler:
                 # print('output:', type(output), output)
                 formatted_output = self._format_category_output(output, category, submission)
                 # print('formatted_output:', type(formatted_output), formatted_output)
-                corrections.extend(formatted_output)
+                feedback.extend(formatted_output)
             
-            return {"status": run.status, "corrections": corrections}
+            return {
+                "status": run.status, 
+                "submission": submission,
+                "feedback": feedback
+                }
         
         except openai.OpenAIError as e:
             raise ValueError(f"OpenAI API error: {str(e)}")
@@ -41,7 +46,8 @@ class OpenAIHandler:
             if assistant:
                 print('assistant exists:', assistant.name)
                 return assistant
-        except openai.OpenAIError:
+        except openai.OpenAIError as e:
+            print('error:', e)
             print('assistant does not exist')
             pass
 
@@ -50,9 +56,9 @@ class OpenAIHandler:
         assistant = self.client.beta.assistants.create(
             name=assistant_name,
             instructions=f"""You are an expert educational assessor for {qualification}-level {subject} - give accurate and extensive feedback on the following assignment, entitled '{assignment_title}', carefully taking in to account the mark scheme provided, where necessary.
-                        Break down your feedback in to categories, giving only feedback for that category and listing your comments as bullet points under that category's title, in the following exact JSON format:
+                        Break down your feedback in to categories, giving only feedback for that category and listing your comments as bullet points under that category's title, in the exact following JSON format:
                         {{
-                            "<category>": [
+                            "<feedback category>": [
                                 "- `correction 1`", 
                                 "- `correction 2`", 
                                 "- `correction 3`",
@@ -60,8 +66,8 @@ class OpenAIHandler:
                                 "- ..."
                             ],
                         }}
-                        It is very important that you enclose each correction in backticks.
-                        It is also very important that you always using double quotation marks "" for each key or value string, and single quotation marks '' for punctuation ONLY.
+                        It is very important that you enclose each correction in backticks within the JSON output.
+                        Do NOT write anything in your reply outside of this JSON, and make sure you always using double quotation marks "" for each key or value string, and single quotation marks '' for punctuation ONLY.
                         """,
             model="gpt-4o",
             temperature=temperature,
@@ -86,24 +92,43 @@ class OpenAIHandler:
             )
         return vector_store
 
-    def _create_thread(self, submission: str):
+    def _init_thread(self, submission: str, assistant_id: str, max_completion_tokens: int):
         if os.path.isfile(submission):
+            print('submission = file')
             submission_file = self.client.files.create(
                 file=open(submission, "rb"), purpose="assistants"
             )
             initial_message = {
                 "role": "user",
-                "content": "Student submission (see attached):",
+                "content": """Student submission is attached below. Please start by transcribing it EXACTLY to text and returning it as a string.
+                It is important that the string representation is as accurate and faithful as possible.
+                Give ONLY the final transcribed submission in your response below (no extra text before and after).
+                For this transciption only, the response does not have to be a JSON.""",                    
                 "attachments": [
                     {"file_id": submission_file.id, "tools": [{"type": "file_search"}]}
                 ],
             }
+            # transcribe_message = {
+            #     "role": "user",
+            #     "content": """Please start by transcribing it EXACTLY to text and returning it as a string.
+            #     It is important that the string representation is as accurate and faithful as possible.""",
+            # }
+            thread = self.client.beta.threads.create(messages=[initial_message])
+            run = self.client.beta.threads.runs.create_and_poll(thread_id=thread.id,
+                                                                assistant_id=assistant_id,
+                                                                max_completion_tokens=max_completion_tokens
+                                                                )
+            submission = self._get_run_output(thread.id, run.id)
+            submission = self._format_string(submission)
+            print('submission string:\n', submission)
         else:
+            print('submission = string')
             initial_message = {
                 "role": "user",
                 "content": f"Student submission:\n{submission}",
             }
-        return self.client.beta.threads.create(messages=[initial_message])
+            thread = self.client.beta.threads.create(messages=[initial_message])
+        return thread, submission
 
     def _get_feedback_messages(self, qualification: str, subject: str) -> Dict[str, Dict[str, str]]:
         return {
@@ -111,7 +136,7 @@ class OpenAIHandler:
                 'role': 'user',
                 'content': f"""
                 1. Spelling, Punctuation and Grammar: give corrections for poor spelling, punctuation and grammar, bullet pointed in the exact following format: `- incorrect word\phrase -> correct word/phrase`. 
-                Give feedback only in the EXACT bullet-point format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
+                Give feedback only in the EXACT bullet-point JSON format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
                 It is VERY important you ONLY reference incorrect words/passages EXACTLY as they occured in the student's submission.
                 Give as many corrections as necessary (but only one point per correction even if the error occurs multiple times), appropriate for a student of {qualification}-level {subject}.
                 """,
@@ -120,7 +145,7 @@ class OpenAIHandler:
                 'role': 'user',
                 'content': f"""
                 2. Historical Accuracy and Analysis of Cause and Effect: give corrections for any errors in historical accuracy, time period awareness or logical analysis of cause and effect, bullet pointed in the exact following format: `- incorrect fact/logic -> correct fact/logic`.
-                Give feedback only in the EXACT bullet-point format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
+                Give feedback only in the EXACT bullet-point JSON format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
                 It is VERY important you ONLY refer incorrect words/passages EXACTLY as they occured in the student's submission.
                 Give as many corrections as necessary, appropriate for a student of {qualification}-level {subject}.
                 """,
@@ -129,7 +154,7 @@ class OpenAIHandler:
                 'role': 'user',
                 'content': f"""
                 3. Overall Comments and Areas for Improvement: give overall comments and suggestions for how the student could improve their work, bullet pointed in the exact following format: `- suggestion`.
-                Give feedback only in the EXACT bullet-point format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
+                Give feedback only in the EXACT bullet-point JSON format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
                 Give up to 3 comments, appropriate for a student of {qualification}-level {subject} and addressed in first person.
                 """,
             },
@@ -137,7 +162,7 @@ class OpenAIHandler:
                 'role': 'user',
                 'content': f"""
                 4. Marking: give estimated marks - carefully and extensively taking into account the mark scheme provided in your vector store - bullet pointed in the exact following format: `- marking feedback comment`.
-                Give feedback only in the EXACT bullet-point format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
+                Give feedback only in the EXACT bullet-point JSON format requested above, and only for the category stated (do NOT include any other feedback in addition to the bullet points of form described above).
                 Give up to 3 comments, appropriate for a student of {qualification}-level {subject} and addressed in first person.
                 """,
             },
@@ -155,6 +180,13 @@ class OpenAIHandler:
             max_completion_tokens=max_completion_tokens,
         )
 
+    def _format_string(text):
+        # replace single newlines with empty string
+        text = re.sub(r'(?<!\n)\n(?!\n)', '', text)
+        # replace multiple newlines with one less
+        text = re.sub(r'\n{2,}', lambda m: '\n' * (len(m.group()) - 1), text)
+        return text
+
     def _get_run_output(self, thread_id: str, run_id: str):
         messages = self.client.beta.threads.messages.list(thread_id=thread_id, run_id=run_id)
         return messages.data[0].content[0].text.value if messages.data else ""
@@ -166,24 +198,46 @@ class OpenAIHandler:
             "overall_comments": "green",
             "marking": "purple",
         }
-
-        # clean up the output JSON content
-        json_content = output.strip('```json\n').strip()
-        
-        # replace erroneous single quotes delimiters with double quotes
+        # print('output=', output)
+        # remove code block markers if present
+        json_content = re.sub(r'```json\s*|\s*```', '', output.strip())
+        # print('json_content0=', json_content)
+        # replace single quotes with double quotes for keys/string values
         json_content = re.sub(r'(^|[,{\[]\s*)\'(?=\S)|(?<=\S)\'(\s*[,}\]]|$)', '"', json_content)
+        # print('json_content1=', json_content)
+        # remove trailing commas if present
+        json_content = re.sub(r',\s*}', '}', json_content)
+        json_content = re.sub(r',\s*]', ']', json_content)
+        # print('json_content2=', json_content)
 
-        # extract JSON
+        # Fix incorrectly double-quoted words within fields
+        # def fix_quotes(match):
+        #     content = match.group(1)
+        #     # Replace double-quoted substrings with single-quoted ones
+        #     content = re.sub(r'"([^"]+)"', r"'\1'", content)
+        #     return f'"{content}"'
+        # json_content = re.sub(r'"([^"]*)"(?=\s*,|\s*})', fix_quotes, json_content)
+        # print('json_content3=', json_content)
+        
+        # try to parse JSON
         try:
             data = json.loads(json_content)
         except json.JSONDecodeError as e:
-            print(f"JSON Decode Error for key {category}: {e}")
+            print(f"JSON Decode Error: {e}")
             print(f"Problematic JSON content: {json_content}")
-            return []
+            
+            # if parsing fails try  ast.literal_eval as a fallback
+            try:
+                import ast
+                data = ast.literal_eval(json_content)
+            except:
+                print("Failed to parse JSON.")
+                return None
 
         # extract list of bullets from output and iterate through
         json_key = list(data.keys())[0]
         bullets = data[json_key]
+        # print('bullets=', bullets)
         response_data = []
         for bullet in bullets:
             bullet = bullet.strip('- ').strip()
@@ -211,7 +265,7 @@ class OpenAIHandler:
                     
                     response_data.append({
                         'category': category,
-                        'incorrect': incorrect_response,
+                        'incorrect_or_highlight': incorrect_response,
                         'correct_or_feedback': correct_response,
                         'citations': citations,
                         'start': start_indices,
@@ -225,7 +279,7 @@ class OpenAIHandler:
                 bullet = bullet.strip().strip('`').strip('...')
                 response_data.append({
                     'category': category,
-                    'incorrect': None,
+                    'incorrect_or_highlight': None,
                     'correct_or_feedback': bullet,
                     'citations': citations,
                     'start': None,

@@ -6,6 +6,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 from openai_handler import OpenAIHandler
+from anthropic_handler import AnthropicHandler
 from utils import validate_input
 
 load_dotenv()  # load env vars from .env file
@@ -18,7 +19,7 @@ API_SCHEMA = {
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
-        'temperature': 1.0
+        'temperature': 0.0
     },
     'file_fields': ['mark_scheme'],
     'text_or_file_fields': ['submission']
@@ -32,6 +33,7 @@ limiter = Limiter(
 )
 
 openai_handler = OpenAIHandler()
+anthropic_handler = AnthropicHandler()
 
 @app.route('/api/feedback', methods=['POST'])
 @limiter.limit("10 per minute")
@@ -39,9 +41,15 @@ def generate_feedback():
     try:
         # validate input data
         data = validate_input(request, API_SCHEMA)
+
+        # choose the appropriate handler based on the 'model' field
+        if data['model'].lower() == 'anthropic':
+            handler = anthropic_handler
+        else:
+            handler = openai_handler
         
         # generate feedback
-        feedback = openai_handler.generate_feedback(
+        feedback = handler.generate_feedback(
             assignment_id=data['assignment_id'],
             assignment_title=data['assignment_title'],
             subject=data['subject'],
@@ -62,4 +70,6 @@ def generate_feedback():
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 if __name__ == '__main__':
-    app.run(port=int(os.getenv('PORT', 5000)), debug=os.getenv('DEBUG', 'False').lower() == 'true')
+    app.config['DEBUG'] = True
+    app.config['PROPAGATE_EXCEPTIONS'] = True
+    app.run(port=int(os.getenv('PORT', 5000)), debug=os.getenv('DEBUG', 'True').lower() == 'true')

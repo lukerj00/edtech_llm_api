@@ -32,11 +32,9 @@ def validate_input(request: Request, schema: Dict[str, Any]) -> Dict[str, Any]:
         if not value:
             raise ValueError(f"Missing required field or file: {field}")
         if isinstance(value, FileStorage):
-            print('sub is:', type(value))
             new_filename = f"{field}-{validated_data['assignment_id']}{os.path.splitext(value.filename)[1]}"
             validated_data[field] = save_file(value, new_filename)
         else:
-            print('sub is:', type(value))
             validated_data[field] = value
 
     # convert types as needed

@@ -1,5 +1,6 @@
 .DS_Store
 .dev_venv/
+.vscode
 __pycache__/
 instruction_texts.py
 /uploaded_files/

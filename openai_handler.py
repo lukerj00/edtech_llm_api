@@ -14,7 +14,6 @@ class OpenAIHandler:
     def generate_feedback(self, assignment_id: str, assignment_title: str, subject: str, 
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
-        print('assistant_id:', assignment_id)
         try:
             assistant = self._get_or_create_assistant(assignment_id, assignment_title, subject, qualification, mark_scheme, temperature)
             thread, submission = self._init_thread(submission, assistant.id, max_completion_tokens)

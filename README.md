@@ -6,7 +6,7 @@ This API generates feedback for student assignments by querying an externally ho
 
 1. Clone the repository
 2. Install dependencies
-3. Edit `.env` file to display proper API key
+3. Make a `.env` file containing correct API keys (eg OPENAI_API_KEY = "") or add these to system environmental vars
 
 ## Usage
 
@@ -25,7 +25,7 @@ Required fields:
 - `mark_scheme`: Mark scheme file
 
 Optional fields:
-- `model`: LLM model to use. Currently only openai is available (default "openai")
+- `model`: LLM model to use. Currently both openai and anthropic are available (default "openai")
 - `max_completion_tokens`: Maximum tokens for LLM response. May fail if this is set to low due to JSON parsing errors (default: 1000)
 - `temperature`: LLM temperature setting. Should mostly be kept at 0 but left optional for tinkering (default: 0)
 

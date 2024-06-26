@@ -21,7 +21,7 @@ Required fields:
 - `assignment_title`: Title of the assignment
 - `subject`: Subject of the assignment (eg 'History')
 - `qualification`: Qualification level (eg 'GCSE')
-- `submission`: Student's submission, can be either text string or file specifier
+- `submission`: Student's submission, can be either text string or file specifier (but only text for anthropic atm)
 - `mark_scheme`: Mark scheme file
 
 Optional fields:

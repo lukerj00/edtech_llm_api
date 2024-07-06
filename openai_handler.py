@@ -186,7 +186,7 @@ class OpenAIHandler:
             max_completion_tokens=max_completion_tokens,
         )
 
-    def _format_string(text):
+    def _format_string(self, text):
         # replace single newlines with empty string
         text = re.sub(r'(?<!\n)\n(?!\n)', '', text)
         # replace multiple newlines with one less
@@ -263,8 +263,11 @@ class OpenAIHandler:
                     incorrect_response, correct_response = parts
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
-                    start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                    end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
+                    if os.path.isfile(submission):
+                        start_indices, end_indices = None, None
+                    else:
+                        start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
+                        end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
                     
                     response_data.append({
                         'category': category,

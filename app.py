@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 # API schema
 API_SCHEMA = {
-    'required_fields': ['assignment_id', 'assignment_title', 'subject', 'qualification'],
+    'required_fields': ['assignment_id', 'assignment_title', 'question_id', 'question_title', 'subject', 'qualification'],
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
@@ -52,6 +52,8 @@ def generate_feedback():
         feedback = handler.generate_feedback(
             assignment_id=data['assignment_id'],
             assignment_title=data['assignment_title'],
+            question_id=data['question_id'],
+            question_title=data['question_title'],
             subject=data['subject'],
             qualification=data['qualification'],
             submission=data['submission'],

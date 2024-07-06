@@ -11,12 +11,12 @@ class OpenAIHandler:
         openai.api_key = os.getenv('OPENAI_API_KEY')
         self.client = openai.OpenAI()
 
-    def generate_feedback(self, assignment_id: str, assignment_title: str, subject: str, 
+    def generate_feedback(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
         try:
-            assistant = self._get_or_create_assistant(assignment_id, assignment_title, subject, qualification, mark_scheme, temperature)
-            thread, submission = self._init_thread(submission, assistant.id, max_completion_tokens)
+            assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_title, subject, qualification, mark_scheme, temperature)
+            thread, submission = self._init_thread(submission, assistant.id, question_title, max_completion_tokens)
             
             feedback = []
             for category, message in self._get_feedback_messages(qualification, subject).items():
@@ -37,7 +37,7 @@ class OpenAIHandler:
         except openai.OpenAIError as e:
             raise ValueError(f"OpenAI API error: {str(e)}")
 
-    def _get_or_create_assistant(self, assignment_id: str, assignment_title: str, subject: str, 
+    def _get_or_create_assistant(self, assignment_id: str, assignment_title: str, question_title: str, subject: str, 
                                  qualification: str, mark_scheme: str, temperature: float):
         assistant_name = f"marking-assistant-{assignment_id}"
         try:
@@ -54,7 +54,7 @@ class OpenAIHandler:
         vector_store = self._create_vector_store(assignment_id, mark_scheme)
         assistant = self.client.beta.assistants.create(
             name=assistant_name,
-            instructions=f"""You are an expert educational assessor for {qualification}-level {subject} - give accurate and extensive feedback on the following assignment, entitled '{assignment_title}', carefully taking in to account the mark scheme provided, where necessary.
+            instructions=f"""You are an expert educational assessor for {qualification}-level {subject} - give accurate and extensive feedback for questions from the following assignment, entitled '{assignment_title}', carefully taking in to account the mark scheme provided where necessary.
                         Break down your feedback in to categories, giving only feedback for that category and listing your comments as bullet points under that category's title, in the exact following JSON format:
                         {{
                             "<feedback category>": [
@@ -91,40 +91,47 @@ class OpenAIHandler:
             )
         return vector_store
 
-    def _init_thread(self, submission: str, assistant_id: str, max_completion_tokens: int):
-        if os.path.isfile(submission):
+    def _init_thread(self, submission: str, assistant_id: str, question_title: str, max_completion_tokens: int):
+        # if submission and submission.startswith('@'):
+        #     file_path = submission[1:]
+        if os.path.isfile(submission): # file_path
             print('submission = file')
-            submission_file = self.client.files.create(
-                file=open(submission, "rb"), purpose="assistants"
-            )
-            initial_message = {
-                "role": "user",
-                "content": """Student submission is attached below. Please start by transcribing it EXACTLY to text and returning it as a string.
-                It is important that the string representation is as accurate and faithful as possible.
-                Give ONLY the final transcribed submission in your response below (no extra text before and after).
-                For this transciption only, the response does not have to be a JSON.""",                    
-                "attachments": [
-                    {"file_id": submission_file.id, "tools": [{"type": "file_search"}]}
-                ],
-            }
-            # transcribe_message = {
-            #     "role": "user",
-            #     "content": """Please start by transcribing it EXACTLY to text and returning it as a string.
-            #     It is important that the string representation is as accurate and faithful as possible.""",
-            # }
-            thread = self.client.beta.threads.create(messages=[initial_message])
-            run = self.client.beta.threads.runs.create_and_poll(thread_id=thread.id,
-                                                                assistant_id=assistant_id,
-                                                                max_completion_tokens=max_completion_tokens
-                                                                )
-            submission = self._get_run_output(thread.id, run.id)
-            submission = self._format_string(submission)
-            print('submission string:\n', submission)
+            try:
+                submission_file = self.client.files.create(
+                    file=open(submission, "rb"), purpose="assistants"
+                )
+                initial_message = {
+                    "role": "user",
+                    "content": f"""Student submission is attached below, for the question '{question_title}'. Please start by transcribing it EXACTLY to text and returning it as a string.
+                    It is important that the string representation is as accurate and faithful as possible.
+                    Give ONLY the final transcribed submission in your response below (no extra text before and after).
+                    For this transciption only, the response does not have to be a JSON.""",                    
+                    "attachments": [
+                        {"file_id": submission_file.id, "tools": [{"type": "file_search"}]}
+                    ],
+                }
+                # transcribe_message = {
+                #     "role": "user",
+                #     "content": """Please start by transcribing it EXACTLY to text and returning it as a string.
+                #     It is important that the string representation is as accurate and faithful as possible.""",
+                # }
+                thread = self.client.beta.threads.create(messages=[initial_message])
+                run = self.client.beta.threads.runs.create_and_poll(thread_id=thread.id,
+                                                                    assistant_id=assistant_id,
+                                                                    max_completion_tokens=max_completion_tokens
+                                                                    )
+                submission = self._get_run_output(thread.id, run.id)
+                submission = self._format_string(submission)
+                print('submission string:\n', submission)
+            except Exception as e:
+                return f'Error processing file: {str(e)}'
+        # else:
+        #     return 'File not found on the server'
         else:
             print('submission = string')
             initial_message = {
                 "role": "user",
-                "content": f"Student submission:\n{submission}",
+                "content": f"Student submission is below, for the question '{question_title}':\n{submission}",
             }
             thread = self.client.beta.threads.create(messages=[initial_message])
         return thread, submission
@@ -256,11 +263,8 @@ class OpenAIHandler:
                     incorrect_response, correct_response = parts
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
-                    if os.path.isfile(submission):
-                        start_indices, end_indices = None, None
-                    else:
-                        start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                        end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
+                    start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
+                    end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
                     
                     response_data.append({
                         'category': category,

@@ -87,10 +87,10 @@ json_feedback = r'''
             ],
             "incorrect_or_highlight": "Afganistan",
             "start": [
-                104,
-                377,
-                595,
-                730
+                103,
+                376,
+                594,
+                729
             ]
         },
         {
@@ -103,28 +103,20 @@ json_feedback = r'''
             ],
             "incorrect_or_highlight": "Mujahidene",
             "start": [
-                207
+                206
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "Afghan",
+            "correct_or_feedback": "discontent",
             "end": [
-                109,
-                206,
-                382,
-                600,
-                735
+                993
             ],
-            "incorrect_or_highlight": "Afgan",
+            "incorrect_or_highlight": "disscontent",
             "start": [
-                104,
-                201,
-                377,
-                595,
-                730
+                981
             ]
         },
         {
@@ -137,127 +129,92 @@ json_feedback = r'''
             ],
             "incorrect_or_highlight": "critisicm",
             "start": [
-                1124
+                1123
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "discontent",
-            "end": [],
-            "incorrect_or_highlight": "discontent",
-            "start": []
+            "correct_or_feedback": "dissatisfaction",
+            "end": [
+                1199
+            ],
+            "incorrect_or_highlight": "disatisfaction",
+            "start": [
+                1184
+            ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "significantly weakened",
+            "correct_or_feedback": "This financial drain and public dissatisfaction significantly weakened",
             "end": [
                 1226
             ],
-            "incorrect_or_highlight": "was significantly weakened",
+            "incorrect_or_highlight": "This financial drain and public disatisfaction was significantly weakened",
             "start": [
-                1200
-            ]
-        },
-        {
-            "category": "SPaG",
-            "citations": null,
-            "colour": "orange",
-            "correct_or_feedback": "billions of dollars were",
-            "end": [
-                765
-            ],
-            "incorrect_or_highlight": "billions of dollars was",
-            "start": [
-                742
+                1152
             ]
         },
         {
             "category": "historical_accuracy",
             "citations": null,
             "colour": "blue",
-            "correct_or_feedback": "the conflict in Afghanistan much worse and more drawn out, lasting until the Soviet withdrawal in 1989",
+            "correct_or_feedback": "The USA got involved, supporting the Afghan Mujahideen through Operation Cyclone, which began in 1979 and involved sending weapons and financial aid to fight the Soviets",
             "end": [
-                437
+                280
             ],
-            "incorrect_or_highlight": "the conflict in Afganistan much worse and more drawn out, lasting until 1989",
+            "incorrect_or_highlight": "The USA got involved, supporting the Afgan Mujahidene by sending them weapons and financial aid to fight the Soviets",
             "start": [
-                361
+                163
             ]
         },
         {
             "category": "historical_accuracy",
             "citations": null,
             "colour": "blue",
-            "correct_or_feedback": "creating significant instability in the region",
+            "correct_or_feedback": "While the US strategy did contribute to prolonging the war, it's important to note that multiple factors, including Soviet military tactics and internal Afghan politics, also played significant roles in the conflict's duration and consequences",
             "end": [
-                483
+                644
             ],
-            "incorrect_or_highlight": "creating a lot of instability in the area",
+            "incorrect_or_highlight": "It's seen that this strategy by the USA, which intended to weaken Soviet influence, led to a prolonged war in Afganistan, causing extensive suffering and chaos",
             "start": [
-                442
+                484
             ]
         },
         {
             "category": "historical_accuracy",
             "citations": null,
             "colour": "blue",
-            "correct_or_feedback": "the Soviet economy, which was already under strain",
+            "correct_or_feedback": "The Soviet Union spent an estimated 15 billion rubles per year on the war, which indeed strained their already struggling economy, but it's important to note that other factors, such as the arms race with the US and internal economic inefficiencies, also contributed to economic pressure",
             "end": [
-                864
+                890
             ],
-            "incorrect_or_highlight": "the Soviet economy, which was not very strong to begin with",
+            "incorrect_or_highlight": "Billions of dollars was poured into the military campaign, and the Soviet economy, which was not very strong to begin with, faced even more pressure",
             "start": [
-                805
+                741
             ]
         },
         {
             "category": "historical_accuracy",
             "citations": null,
             "colour": "blue",
-            "correct_or_feedback": "US-led economic sanctions",
+            "correct_or_feedback": "While US economic actions did impact the Soviet Union, it's worth noting that the most significant sanctions were implemented earlier, particularly after the Soviet invasion of Afghanistan. The war itself was a major factor in the economic strain",
             "end": [
                 937
             ],
-            "incorrect_or_highlight": "US economic sanctions",
+            "incorrect_or_highlight": "This was exacerbated by US economic sanctions",
             "start": [
-                916
-            ]
-        },
-        {
-            "category": "historical_accuracy",
-            "citations": null,
-            "colour": "blue",
-            "correct_or_feedback": "leading to widespread criticism of the Soviet government",
-            "end": [
-                1151
-            ],
-            "incorrect_or_highlight": "leading to widespread critisicm of the government",
-            "start": [
-                1102
-            ]
-        },
-        {
-            "category": "historical_accuracy",
-            "citations": null,
-            "colour": "blue",
-            "correct_or_feedback": "contributing to the eventual dissolution of the Soviet Union in 1991",
-            "end": [
-                1329
-            ],
-            "incorrect_or_highlight": "contributing to its eventual decline and collapse",
-            "start": [
-                1280
+                891
             ]
         },
         {
             "category": "overall_comments",
             "citations": null,
             "colour": "green",
-            "correct_or_feedback": "I suggest providing more specific examples of how the US support for the Mujahideen impacted the conflict, such as mentioning the types of weapons supplied or key battles influenced by this support",
+            "correct_or_feedback": "You've done a good job identifying two significant consequences of the Soviet invasion of Afghanistan: the US involvement and the economic strain on the Soviet Union. Your analysis shows a solid understanding of the topic",
             "end": null,
             "incorrect_or_highlight": null,
             "start": null
@@ -266,7 +223,7 @@ json_feedback = r'''
             "category": "overall_comments",
             "citations": null,
             "colour": "green",
-            "correct_or_feedback": "It would be beneficial to include some statistics or quotes from historical figures to strengthen your points about the economic strain on the Soviet Union",
+            "correct_or_feedback": "To strengthen your answer, try to include more specific dates and figures where possible. For example, mentioning the exact year the Soviet Union withdrew from Afghanistan (1989) adds precision to your response",
             "end": null,
             "incorrect_or_highlight": null,
             "start": null
@@ -275,7 +232,7 @@ json_feedback = r'''
             "category": "overall_comments",
             "citations": null,
             "colour": "green",
-            "correct_or_feedback": "To improve your analysis, try to explain the broader geopolitical consequences of the Soviet invasion, such as its impact on US-Soviet relations and the Cold War dynamics",
+            "correct_or_feedback": "Consider expanding on the global impact of these consequences. For instance, you could discuss how the US support for the Mujahideen affected future geopolitical relationships in the region",
             "end": null,
             "incorrect_or_highlight": null,
             "start": null
@@ -284,7 +241,7 @@ json_feedback = r'''
             "category": "marking",
             "citations": null,
             "colour": "purple",
-            "correct_or_feedback": "You have demonstrated a good understanding of the period and provided specific information about the consequences of the Soviet invasion of Afghanistan, which aligns with Level 2 of the mark scheme",
+            "correct_or_feedback": "Your answer demonstrates features of the period analyzed to explain consequences, showing good knowledge and understanding. This aligns with Level 2 (3-4 marks) in the mark scheme",
             "end": null,
             "incorrect_or_highlight": null,
             "start": null
@@ -293,7 +250,7 @@ json_feedback = r'''
             "category": "marking",
             "citations": null,
             "colour": "purple",
-            "correct_or_feedback": "Your analysis of the economic strain on the Soviet Union and the prolonged conflict in Afghanistan shows a clear grasp of the cause and effect, which is essential for achieving higher marks",
+            "correct_or_feedback": "You've provided specific information about the topic to support your explanation, such as the US support for the Mujahideen and the economic strain on the Soviet Union. This further supports a Level 2 assessment",
             "end": null,
             "incorrect_or_highlight": null,
             "start": null
@@ -302,14 +259,14 @@ json_feedback = r'''
             "category": "marking",
             "citations": null,
             "colour": "purple",
-            "correct_or_feedback": "Based on the mark scheme, I would estimate your response to be in the 3-4 mark range for each consequence, giving a total of 6-8 marks out of 8",
+            "correct_or_feedback": "Based on the mark scheme and your response, I would award 7 out of 8 marks (4 for AO2 and 3 for AO1). To achieve full marks, consider including more precise details and expanding on the global impact of these consequences",
             "end": null,
             "incorrect_or_highlight": null,
             "start": null
         }
     ],
     "status": "completed",
-    "submission": "Explain two consequences of the Soviet invasion of Afghanistan\n\nIn 1979, the Soviet Union's invasion of Afganistan seriously escalated Cold War tensions even more. The USA got involved, supporting the Afgan Mujahidene by sending them weapons and financial aid to fight the Soviets. This American support aimed to counter Soviet expansion, but actually, it made the conflict in Afganistan much worse and more drawn out, lasting until 1989 and creating a lot of instability in the area. It's seen that this strategy by the USA, which intended to weaken Soviet influence, led to a prolonged war in Afganistan, causing extensive suffering and chaos.\n\nOn the economic side, the Soviet Union felt a massive strain because of the war in Afganistan. Billions of dollars was poured into the military campaign, and the Soviet economy, which was not very strong to begin with, faced even more pressure. This was exacerbated by US economic sanctions. As war dragged on without a clear victory, disscontent grew within the Soviet Union. People began questioning the purpose and the high cost of continuing the war, leading to widespread critisicm of the government. This financial drain and public disatisfaction was significantly weakened the Soviet Union's economic and political stability, contributing to its eventual decline and collapse."
+    "submission": "Explain two consequences of the Soviet invasion of Afghanistan\n\nIn 1979, the Soviet Union's invasion of Afganistan seriously escalated\nCold War tensions even more. The USA got involved, supporting the\nAfgan Mujahidene by sending them weapons and financial aid to fight\nthe Soviets. This American support aimed to counter Soviet expansion,\nbut actually, it made the conflict in Afganistan much worse and more\ndrawn out, lasting until 1989 and creating a lot of instability in the area.\nIt's seen that this strategy by the USA, which intended to weaken\nSoviet influence, led to a prolonged war in Afganistan, causing\nextensive suffering and chaos.\n\nOn the economic side, the Soviet Union felt a massive strain because of\nthe war in Afganistan. Billions of dollars was poured into the military\ncampaign, and the Soviet economy, which was not very strong to begin\nwith, faced even more pressure. This was exacerbated by US economic\nsanctions. As war dragged on without a clear victory, disscontent grew\nwithin the Soviet Union. People began questioning the purpose and the\nhigh cost of continuing the war, leading to widespread critisicm of the\ngovernment. This financial drain and public disatisfaction was\nsignificantly weakened the Soviet Union's economic and political\nstability, contributing to its eventual decline and collapse."
 }
 '''
 highlight_text(json_feedback)

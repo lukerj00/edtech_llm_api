@@ -16,13 +16,16 @@ class AnthropicHandler:
             api_key=os.environ['ANTHROPIC_API_KEY']
         )
     
-    def generate_feedback(self, assignment_id: str, assignment_title: str, subject: str, 
+    def generate_feedback(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
         try:
-            mark_scheme_payload = self._process_mark_scheme(mark_scheme)
+            print('submission=',submission)
+            submission = self._get_submission(submission, max_completion_tokens, temperature)
+            print('submission processed, new submission =', submission)
+            mark_scheme_payload = self._process_file(mark_scheme)
             print('mark scheme payload obtained')
-            messages = self._get_initial_messages(assignment_title, subject, qualification, submission, mark_scheme_payload, max_completion_tokens)
+            messages = self._get_initial_messages(assignment_title, question_title, subject, qualification, submission, mark_scheme_payload, max_completion_tokens)
             print('initial messages obtained')
             # print('messages:', type(messages), len(messages), messages[-1])
             
@@ -47,7 +50,49 @@ class AnthropicHandler:
         except anthropic.AnthropicError as e:
             raise ValueError(f"Anthropic API error: {str(e)}")
         
-    def _process_mark_scheme(self, mark_scheme):
+    def _get_submission(self, submission: str, max_completion_tokens: int, temperature: int):
+        # if submission and submission.startswith('@'):
+        #     file_path = submission[1:]
+        if os.path.isfile(submission): # file_path
+            print('submission = file')
+            try:
+                submission_payload = self._process_file(submission)
+                transcribe_message = [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Please transcribe the following attachment to text, "
+                                    "preserving the exact layout and text of the attachment. "
+                                    "Include ONLY the transcription in your reply. "
+                                    "Here is the attachment:"
+                                ),
+                            },
+                            {
+                                "type": "image",
+                                "source": submission_payload,
+                            },
+                        ],
+                    },
+                ]
+                message = self.client.messages.create(
+                    model="claude-3-5-sonnet-20240620",
+                    messages=transcribe_message,
+                    max_tokens=max_completion_tokens,
+                    temperature=temperature
+                    )
+                return message.content[0].text
+            except Exception as e:
+                return f'Error processing file: {str(e)}'
+        # else:
+        #     return 'File not found on the server'
+        else:
+            print('submission = text')
+            return submission
+        
+    def _process_file(self, mark_scheme):
         image_extensions = ('.png', '.jpg', '.jpeg', '.gif', '.webp')
         _, file_extension = os.path.splitext(mark_scheme)
         file_extension = file_extension.lower()
@@ -75,13 +120,13 @@ class AnthropicHandler:
                 "data": base64_encoded
             }
         
-    def _get_initial_messages(self, assignment_title: str, subject: str, qualification: str, submission: str, mark_scheme_payload: Dict[str, Any], max_completion_tokens: int):
+    def _get_initial_messages(self, assignment_title: str, question_title: str, subject: str, qualification: str, submission: str, mark_scheme_payload: Dict[str, Any], max_completion_tokens: int):
         instructions = {
             "role": "user",
             "content": [
                 {
                     "type": "text",
-                    "text": f"""You are an expert educational assessor for {qualification}-level {subject} - give accurate and extensive feedback on the following assignment, entitled '{assignment_title}', carefully taking in to account the mark scheme provided, where necessary.
+                    "text": f"""You are an expert educational assessor for {qualification}-level {subject} - give accurate and extensive feedback on the following question, entitled '{question_title}', from an assignment entitled '{assignment_title}', carefully taking in to account the mark scheme provided where necessary.
                         Break down your feedback in to categories, giving only feedback for that category and listing your comments as bullet points under that category's title, in the exact following JSON format:
                         {{
                             "<feedback category>": [
@@ -102,7 +147,7 @@ class AnthropicHandler:
             "content": [
                 {
                     "type": "text",
-                    "text": f"""The user's submission is below:
+                    "text": f"""The user's submission to the question is below:
                         {submission}
                         and the mark scheme is attached to this message. 
                         Parse these both and await further instructions regarding the feedback categories required.
@@ -260,7 +305,6 @@ class AnthropicHandler:
         except json.JSONDecodeError as e:
             print(f"JSON Decode Error: {e}")
             print(f"Problematic JSON content: {output_message}")
-
             try:
                 import ast
                 data = ast.literal_eval(output_message)
@@ -291,11 +335,11 @@ class AnthropicHandler:
                     incorrect_response, correct_response = parts
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
-                    if os.path.isfile(submission):
-                        start_indices, end_indices = None, None
-                    else:
-                        start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                        end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
+                    # print('incorrect_resp=',incorrect_response,'repr sub =', repr(submission))
+                    match_indices = find_matches(incorrect_response, submission)
+                    start_indices, end_indices = zip(*match_indices) if match_indices else ([], []) 
+                    # start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE | re.DOTALL)]
+                    # end_indices = [ind + len(incorrect_response) for ind in start_indices]
                     
                     response_data.append({
                         'category': category,
@@ -325,3 +369,70 @@ class AnthropicHandler:
                 print(f"Warning: Invalid category '{category}'")
 
         return response_data
+    
+def find_matches(incorrect_response, submission):
+    submission_repr = repr(submission)
+
+    # Remove the leading/trailing quotes from the repr string
+    submission_repr = submission_repr.strip('"').replace('\\n', '\n')
+    
+    # Normalize the incorrect response
+    norm_incorrect = re.sub(r'\s+', r'\\s+', incorrect_response.strip())
+    
+    # Create a pattern that matches the incorrect response flexibly
+    pattern = r'(?:\b|\s)' + norm_incorrect + r'(?:\b|\s)'
+
+    # Find all matches in the submission
+    matches = list(re.finditer(pattern, submission_repr, re.IGNORECASE | re.DOTALL))
+
+    # Extract start and end indices
+    indices = [(match.start(), match.end()) for match in matches]
+
+    return indices
+    
+# def normalize_text(text):
+#     return re.sub(r'\s+', ' ', text.strip())
+
+# def find_matches(incorrect_response, submission):
+#     norm_incorrect = normalize_text(incorrect_response)
+#     norm_submission = normalize_text(submission)
+
+#     # Create a pattern that allows for flexible whitespace between words
+#     pattern = r'\b' + r'\s+'.join(re.escape(word) for word in norm_incorrect.split()) + r'\b'
+
+#     # Find matches in the normalized submission
+#     norm_matches = list(re.finditer(pattern, norm_submission, re.IGNORECASE))
+
+#     indices = []
+#     for match in norm_matches:
+#         # Find the corresponding start and end in the original submission
+#         start = find_original_index(submission, match.start())
+#         end = find_original_index(submission, match.end())
+#         indices.append((start, end))
+
+#     return indices
+
+# def find_original_index(original_text, normalized_index):
+#     # Count non-whitespace characters to find the corresponding index in the original text
+#     normalized_count = 0
+#     for i, char in enumerate(original_text):
+#         if not char.isspace():
+#             if normalized_count == normalized_index:
+#                 return i
+#             normalized_count += 1
+#     return len(original_text)
+    
+# def find_matches(incorrect_response, submission):
+#     # Normalize incorrect_response by replacing newlines and multiple spaces with a flexible pattern
+#     norm_incorrect = re.sub(r'\s+', r'\\s+', re.escape(incorrect_response.strip()))
+    
+#     # Create a pattern that matches the incorrect response flexibly
+#     pattern = r'(?:\b|\s)' + norm_incorrect + r'(?:\b|\s)'
+
+#     # Find all matches in the original submission
+#     matches = list(re.finditer(pattern, submission, re.IGNORECASE | re.DOTALL))
+
+#     # Extract start and end indices
+#     indices = [(match.start(), match.end()) for match in matches]
+
+#     return indices

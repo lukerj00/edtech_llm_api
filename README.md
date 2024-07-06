@@ -16,18 +16,28 @@ Start the local server:
 
 Send a POST request to `/api/feedback` with the following form data:
 
-Required fields:
-- `assignment_id`: Unique identifier for the assignment
-- `assignment_title`: Title of the assignment
-- `subject`: Subject of the assignment (eg 'History')
-- `qualification`: Qualification level (eg 'GCSE')
-- `submission`: Student's submission, can be either text string or file specifier (but only text for anthropic atm)
-- `mark_scheme`: Mark scheme file
+### Required Fields
 
-Optional fields:
-- `model`: LLM model to use. Currently both openai and anthropic are available (default "openai")
-- `max_completion_tokens`: Maximum tokens for LLM response. May fail if this is set to low due to JSON parsing errors (default: 1000)
-- `temperature`: LLM temperature setting. Should mostly be kept at 0 but left optional for tinkering (default: 0)
+| Parameter         | Type           | Required | Description                                                         |
+|-------------------|----------------|----------|---------------------------------------------------------------------|
+| `assignment_id`   | `string`       | Yes      | Unique identifier for the assignment                                |
+| `assignment_title`| `string`       | Yes      | Title of the assignment                                             |
+| `question_id`     | `string`       | Yes      | Unique identifier for the question                                  |
+| `question_title`  | `string`       | Yes      | Title of the question                                               |
+| `subject`         | `string`       | Yes      | Subject of the assignment (e.g., 'History')                         |
+| `qualification`   | `string`       | Yes      | Qualification level (e.g., 'GCSE')                                  |
+| `submission`      | `string` or `file` | Yes  | Student's submission, can be either text string or file specifier (but only text for anthropic at the moment) |
+| `mark_scheme`     | `file`         | Yes      | Mark scheme file                                                    |
+
+### Optional Fields
+
+| Parameter             | Type     | Required | Description                                                                                     |
+|-----------------------|----------|----------|-------------------------------------------------------------------------------------------------|
+| `model`               | `string` | No       | LLM model to use. Currently both OpenAI ("openai") and Anthropic ("anthropic") are available (default: "openai")         |
+| `max_completion_tokens` | `integer`| No      | Maximum tokens for LLM response. May fail if this is set too low due to JSON parsing errors (default: 1000) |
+| `temperature`         | `float`  | No       | LLM temperature setting. Should mostly be kept at 0 but left optional for tinkering (default: 0) |
+
+Note that the only file type supported at the moment is PDF, but image/other file support may be implemented later.
 
 Example cURL request (see example_files):
 
@@ -35,7 +45,7 @@ Example cURL request (see example_files):
 curl -X POST 'http://127.0.0.1:5000/api/feedback' -H 'Content-Type: multipart/form-data' -F 'assignment_id=123' -F 'assignment_title=Explain two consequences of the Soviet invasion of Afghanistan' -F 'subject=history' -F 'qualification=GCSE' -F 'submission=@example_files/example-submission.pdf' -F 'model=openai' -F 'mark_scheme=@example_files/example-ms.pdf'
 ```
 
-The API will return a JSON response with feedback categorized into SPaG, historical accuracy, overall comments, and marking, eg:
+The API will return a JSON response with feedback categorized into SPaG (Spelling, Punctuation and Grammar), historical accuracy, overall comments, and marking, eg:
 
 {
     "category": "SPaG",

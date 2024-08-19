@@ -19,7 +19,7 @@ API_SCHEMA = {
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
-        'temperature': 0.0
+        'temperature': 1
     },
     'file_fields': ['mark_scheme'],
     'text_or_file_fields': ['submission']
@@ -37,7 +37,7 @@ anthropic_handler = AnthropicHandler()
 
 @app.route('/api/feedback', methods=['POST'])
 @limiter.limit("10 per minute")
-def generate_feedback():
+def handle_feedback_request():
     try:
         # validate input data
         data = validate_input(request, API_SCHEMA)
@@ -73,5 +73,5 @@ def generate_feedback():
 
 if __name__ == '__main__':
     app.config['DEBUG'] = True
-    app.config['PROPAGATE_EXCEPTIONS'] = True
-    app.run(port=int(os.getenv('PORT', 5000)), debug=os.getenv('DEBUG', 'True').lower() == 'true')
+    # app.config['PROPAGATE_EXCEPTIONS'] = True
+    app.run(port=int(os.getenv('PORT', 5000))) #, debug=os.getenv('DEBUG', 'True').lower() == 'true')

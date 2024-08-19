@@ -23,7 +23,7 @@ def validate_input(request: Request, schema: Dict[str, Any]) -> Dict[str, Any]:
         file = request.files.get(field)
         if not file:
             raise ValueError(f"Missing required file: {field}")
-        new_filename = f"{field}-{validated_data['assignment_id']}{os.path.splitext(file.filename)[1]}"
+        new_filename = f"{field}-a{validated_data['assignment_id']}-q{validated_data['question_id']}{os.path.splitext(file.filename)[1]}"
         validated_data[field] = save_file(file, new_filename)
 
     # check text or file fields
@@ -32,7 +32,7 @@ def validate_input(request: Request, schema: Dict[str, Any]) -> Dict[str, Any]:
         if not value:
             raise ValueError(f"Missing required field or file: {field}")
         if isinstance(value, FileStorage):
-            new_filename = f"{field}-{validated_data['assignment_id']}{os.path.splitext(value.filename)[1]}"
+            new_filename = f"{field}-a{validated_data['assignment_id']}-q{validated_data['question_id']}{os.path.splitext(value.filename)[1]}"
             validated_data[field] = save_file(value, new_filename)
         else:
             validated_data[field] = value

@@ -14,8 +14,11 @@ class OpenAIHandler:
     def generate_feedback(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
+        print('DEBUG temp=', temperature)
+        print('DEBUG ass_id=', assignment_id)
+        print('DEBUG q_id=', question_id)
         try:
-            assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_title, subject, qualification, mark_scheme, temperature)
+            assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, mark_scheme, temperature)
             thread, submission = self._init_thread(submission, assistant.id, question_title, max_completion_tokens)
             
             feedback = []
@@ -23,10 +26,12 @@ class OpenAIHandler:
                 run = self._create_and_poll_run(thread.id, assistant.id, message, max_completion_tokens)
                 print(f'{category} query status:', run.status)
                 output = self._get_run_output(thread.id, run.id)
-                # print('output:', type(output), output)
+                print('output obtained', type(output), output)
                 formatted_output = self._format_category_output(output, category, submission)
-                # print('formatted_output:', type(formatted_output), formatted_output)
+                print('formatted_output obtained:', type(formatted_output), formatted_output)
                 feedback.extend(formatted_output)
+
+            print('returning feedback:', type(feedback))
             
             return {
                 "status": run.status, 
@@ -37,9 +42,13 @@ class OpenAIHandler:
         except openai.OpenAIError as e:
             raise ValueError(f"OpenAI API error: {str(e)}")
 
-    def _get_or_create_assistant(self, assignment_id: str, assignment_title: str, question_title: str, subject: str, 
+    def _get_or_create_assistant(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                                  qualification: str, mark_scheme: str, temperature: float):
-        assistant_name = f"marking-assistant-{assignment_id}"
+        assistant_name = f"marking-assistant-a{assignment_id}-q{question_id}"
+        if os.path.isfile(mark_scheme):
+            print('ms = file')
+        else:
+            print('ms = string')
         try:
             assistant = next((a for a in self.client.beta.assistants.list() if a.name == assistant_name), None)
             if assistant:
@@ -51,7 +60,8 @@ class OpenAIHandler:
             pass
 
         # create new assistant if doesn't exist
-        vector_store = self._create_vector_store(assignment_id, mark_scheme)
+        vector_store = self._create_vector_store(assignment_id, question_id, mark_scheme)
+        print('assistant temp=', temperature)
         assistant = self.client.beta.assistants.create(
             name=assistant_name,
             instructions=f"""You are an expert educational assessor for {qualification}-level {subject} - give accurate and extensive feedback for questions from the following assignment, entitled '{assignment_title}', carefully taking in to account the mark scheme provided where necessary.
@@ -81,8 +91,8 @@ class OpenAIHandler:
         # )
         return assistant
 
-    def _create_vector_store(self, assignment_id: str, mark_scheme: str):
-        vector_store_name = f"vector-store-{assignment_id}"
+    def _create_vector_store(self, assignment_id: str, question_id: str, mark_scheme: str):
+        vector_store_name = f"vector-store-a{assignment_id}-q{question_id}"
         vector_store = self.client.beta.vector_stores.create(name=vector_store_name)
         with open(mark_scheme, "rb") as file_stream:
             self.client.beta.vector_stores.files.upload_and_poll(

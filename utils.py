@@ -45,6 +45,6 @@ def validate_input(request: Request, schema: Dict[str, Any]) -> Dict[str, Any]:
 
 def save_file(file: FileStorage, new_filename: str) -> str:
     file_path = os.path.join('uploaded_files', new_filename)
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True, mode=0o777)
     file.save(file_path)
     return file_path

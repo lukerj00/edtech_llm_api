@@ -19,7 +19,7 @@ API_SCHEMA = {
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
-        'temperature': 1
+        'temperature': 0.0001
     },
     'file_fields': ['mark_scheme'],
     'text_or_file_fields': ['submission']
@@ -72,6 +72,6 @@ def handle_feedback_request():
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 if __name__ == '__main__':
-    app.config['DEBUG'] = True
+    app.config['DEBUG'] = False
     # app.config['PROPAGATE_EXCEPTIONS'] = True
     app.run(port=int(os.getenv('PORT', 5000))) #, debug=os.getenv('DEBUG', 'True').lower() == 'true')

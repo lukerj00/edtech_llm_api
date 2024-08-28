@@ -19,11 +19,11 @@ class OpenAIHandler:
         print('DEBUG q_id=', question_id)
         try:
             assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, mark_scheme, temperature)
-            thread, submission = self._init_thread(submission, assistant.id, question_title, max_completion_tokens)
+            thread, submission = self._init_thread(submission, assistant.id, question_title, max_completion_tokens, temperature)
             
             feedback = []
             for category, message in self._get_feedback_messages(qualification, subject).items():
-                run = self._create_and_poll_run(thread.id, assistant.id, message, max_completion_tokens)
+                run = self._create_and_poll_run(thread.id, assistant.id, message, max_completion_tokens, temperature)
                 print(f'{category} query status:', run.status)
                 output = self._get_run_output(thread.id, run.id)
                 print('output obtained', type(output), output)
@@ -101,7 +101,7 @@ class OpenAIHandler:
             )
         return vector_store
 
-    def _init_thread(self, submission: str, assistant_id: str, question_title: str, max_completion_tokens: int):
+    def _init_thread(self, submission: str, assistant_id: str, question_title: str, max_completion_tokens: int, temperature: float):
         # if submission and submission.startswith('@'):
         #     file_path = submission[1:]
         if os.path.isfile(submission): # file_path
@@ -128,11 +128,12 @@ class OpenAIHandler:
                 thread = self.client.beta.threads.create(messages=[initial_message])
                 run = self.client.beta.threads.runs.create_and_poll(thread_id=thread.id,
                                                                     assistant_id=assistant_id,
-                                                                    max_completion_tokens=max_completion_tokens
+                                                                    max_completion_tokens=max_completion_tokens,
+                                                                    temperature=temperature
                                                                     )
                 submission = self._get_run_output(thread.id, run.id)
                 submission = self._format_string(submission)
-                print('submission string:\n', submission)
+                print('submission string:\n', type(submission), submission)
             except Exception as e:
                 return f'Error processing file: {str(e)}'
         # else:
@@ -184,7 +185,7 @@ class OpenAIHandler:
             },
         }
 
-    def _create_and_poll_run(self, thread_id: str, assistant_id: str, message: Dict[str, str], max_completion_tokens: int):
+    def _create_and_poll_run(self, thread_id: str, assistant_id: str, message: Dict[str, str], max_completion_tokens: int, temperature: float):
         self.client.beta.threads.messages.create(
             thread_id=thread_id,
             role=message['role'],
@@ -194,6 +195,7 @@ class OpenAIHandler:
             thread_id=thread_id, 
             assistant_id=assistant_id,
             max_completion_tokens=max_completion_tokens,
+            temperature=temperature
         )
 
     def _format_string(self, text):

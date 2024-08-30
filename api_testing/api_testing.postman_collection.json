@@ -80,6 +80,79 @@
 			"response": []
 		},
 		{
+			"name": "AF http://127.0.0.1:5000/api/chat",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "assignment_id",
+							"value": "111",
+							"type": "text"
+						},
+						{
+							"key": "assignment_title",
+							"value": "Cold War homework assignment 1",
+							"type": "text"
+						},
+						{
+							"key": "question_id",
+							"value": "222",
+							"type": "text"
+						},
+						{
+							"key": "question_title",
+							"value": "Explain two consequences of the Soviet invasion of Afghanistan",
+							"type": "text"
+						},
+						{
+							"key": "subject",
+							"value": "history",
+							"type": "text"
+						},
+						{
+							"key": "qualification",
+							"value": "GCSE",
+							"type": "text"
+						},
+						{
+							"key": "submission",
+							"value": "In 1979, the Soviet Union's invasion of Afganistan seriously escalated Cold War tensions even more. The USA got involved, supporting the Afgan Mujahidene by sending them weapons and financial aid to fight the Soviets. This American support aimed to counter Soviet expansion, but actually, it made the conflict in Afganistan much worse and more drawn out, lasting until 1989 and creating a lot of instability in the area. It's seen that this strategy by the USA, which intended to weaken Soviet influence, led to a prolonged war in Afganistan, causing extensive suffering and chaos. \\nOn the economic side, the Soviet Union felt a massive strain because of the war in Afganistan. Billions of dollars was poured into the military campaign, and the Soviet economy, which was not very strong to begin with, faced even more pressure. This was exacerbated by US economic sanctions. As war dragged on without a clear victory, disscontent grew within the Soviet Union. People began questioning the purpose and the high cost of continuing the war, leading to widespread critisicm of the government. This financial drain and public disatisfaction was significantly weakened the Soviet Union's economic and political stability, contributing to its eventual decline and collapse.",
+							"type": "text"
+						},
+						{
+							"key": "mark_scheme",
+							"type": "file",
+							"src": "postman-cloud:///1ef2e816-29be-4ee0-b4ad-432bda499041"
+						},
+						{
+							"key": "model",
+							"value": "openai",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/api/feedback",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"feedback"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "OT http://127.0.0.1:5000/api/chat Copy 2",
 			"request": {
 				"method": "POST",
@@ -153,7 +226,7 @@
 			"response": []
 		},
 		{
-			"name": "AT http://127.0.0.1:5000/api/chat Copy",
+			"name": "AT http://127.0.0.1:5000/api/chat",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -162,11 +235,21 @@
 					"formdata": [
 						{
 							"key": "assignment_id",
-							"value": "123",
+							"value": "111",
 							"type": "text"
 						},
 						{
 							"key": "assignment_title",
+							"value": "Cold War homework assignment 1",
+							"type": "text"
+						},
+						{
+							"key": "question_id",
+							"value": "222",
+							"type": "text"
+						},
+						{
+							"key": "question_title",
 							"value": "Explain two consequences of the Soviet invasion of Afghanistan",
 							"type": "text"
 						},
@@ -186,77 +269,14 @@
 							"type": "text"
 						},
 						{
-							"key": "model",
-							"value": "openai",
-							"type": "text"
-						},
-						{
 							"key": "mark_scheme",
 							"type": "file",
 							"src": "postman-cloud:///1ef2e816-29be-4ee0-b4ad-432bda499041"
-						}
-					]
-				},
-				"url": {
-					"raw": "http://127.0.0.1:5000/api/feedback",
-					"protocol": "http",
-					"host": [
-						"127",
-						"0",
-						"0",
-						"1"
-					],
-					"port": "5000",
-					"path": [
-						"api",
-						"feedback"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "AF http://127.0.0.1:5000/api/chat Copy 2",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "assignment_id",
-							"value": "123",
-							"type": "text"
-						},
-						{
-							"key": "assignment_title",
-							"value": "Explain two consequences of the Soviet invasion of Afghanistan",
-							"type": "text"
-						},
-						{
-							"key": "subject",
-							"value": "history",
-							"type": "text"
-						},
-						{
-							"key": "qualification",
-							"value": "GCSE",
-							"type": "text"
-						},
-						{
-							"key": "submission",
-							"value": "In 1979, the Soviet Union's invasion of Afganistan seriously escalated Cold War tensions even more. The USA got involved, supporting the Afgan Mujahidene by sending them weapons and financial aid to fight the Soviets. This American support aimed to counter Soviet expansion, but actually, it made the conflict in Afganistan much worse and more drawn out, lasting until 1989 and creating a lot of instability in the area. It's seen that this strategy by the USA, which intended to weaken Soviet influence, led to a prolonged war in Afganistan, causing extensive suffering and chaos. \\nOn the economic side, the Soviet Union felt a massive strain because of the war in Afganistan. Billions of dollars was poured into the military campaign, and the Soviet economy, which was not very strong to begin with, faced even more pressure. This was exacerbated by US economic sanctions. As war dragged on without a clear victory, disscontent grew within the Soviet Union. People began questioning the purpose and the high cost of continuing the war, leading to widespread critisicm of the government. This financial drain and public disatisfaction was significantly weakened the Soviet Union's economic and political stability, contributing to its eventual decline and collapse.",
-							"type": "text"
 						},
 						{
 							"key": "model",
 							"value": "openai",
 							"type": "text"
-						},
-						{
-							"key": "mark_scheme",
-							"type": "file",
-							"src": "postman-cloud:///1ef2e816-29be-4ee0-b4ad-432bda499041"
 						}
 					]
 				},

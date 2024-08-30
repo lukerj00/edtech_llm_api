@@ -132,8 +132,9 @@ class OpenAIHandler:
                                                                     temperature=temperature
                                                                     )
                 submission = self._get_run_output(thread.id, run.id)
+                print('unformatted submission:\n', submission)
                 submission = self._format_string(submission)
-                print('submission string:\n', type(submission), submission)
+                print('formatted submission:\n', type(submission), submission, "\nsub_string_ended")
             except Exception as e:
                 return f'Error processing file: {str(e)}'
         # else:

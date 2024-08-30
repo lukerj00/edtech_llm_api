@@ -19,7 +19,7 @@ API_SCHEMA = {
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
-        'temperature': 0.0001
+        'temperature': 1 # 0.0001
     },
     'file_fields': ['mark_scheme'],
     'text_or_file_fields': ['submission']

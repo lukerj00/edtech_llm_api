@@ -20,8 +20,9 @@ class AnthropicHandler:
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
         try:
+            print('temperature=',temperature)
             print('submission=',submission)
-            submission = self._get_submission(submission, max_completion_tokens, temperature)
+            submission = self._get_submission_text(submission, max_completion_tokens, temperature)
             print('submission processed, new submission =', submission)
             mark_scheme_payload = self._process_file(mark_scheme)
             print('mark scheme payload obtained')
@@ -50,7 +51,7 @@ class AnthropicHandler:
         except anthropic.AnthropicError as e:
             raise ValueError(f"Anthropic API error: {str(e)}")
         
-    def _get_submission(self, submission: str, max_completion_tokens: int, temperature: int):
+    def _get_submission_text(self, submission: str, max_completion_tokens: int, temperature: int):
         # if submission and submission.startswith('@'):
         #     file_path = submission[1:]
         if os.path.isfile(submission): # file_path

@@ -217,28 +217,14 @@ class OpenAIHandler:
             "overall_comments": "green",
             "marking": "purple",
         }
-        # print('output=', output)
         # remove code block markers if present
         json_content = re.sub(r'```json\s*|\s*```', '', output.strip())
-        # print('json_content0=', json_content)
         # replace single quotes with double quotes for keys/string values
         json_content = re.sub(r'(^|[,{\[]\s*)\'(?=\S)|(?<=\S)\'(\s*[,}\]]|$)', '"', json_content)
-        # print('json_content1=', json_content)
         # remove trailing commas if present
         json_content = re.sub(r',\s*}', '}', json_content)
         json_content = re.sub(r',\s*]', ']', json_content)
-        # print('json_content2=', json_content)
-
-        # Fix incorrectly double-quoted words within fields
-        # def fix_quotes(match):
-        #     content = match.group(1)
-        #     # Replace double-quoted substrings with single-quoted ones
-        #     content = re.sub(r'"([^"]+)"', r"'\1'", content)
-        #     return f'"{content}"'
-        # json_content = re.sub(r'"([^"]*)"(?=\s*,|\s*})', fix_quotes, json_content)
-        # print('json_content3=', json_content)
-        
-        # try to parse JSON
+        ###
         try:
             data = json.loads(json_content)
         except json.JSONDecodeError as e:
@@ -276,11 +262,8 @@ class OpenAIHandler:
                     incorrect_response, correct_response = parts
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
-                    if os.path.isfile(submission):
-                        start_indices, end_indices = None, None
-                    else:
-                        start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                        end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
+                    start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
+                    end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
                     
                     response_data.append({
                         'category': category,

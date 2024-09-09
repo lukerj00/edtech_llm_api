@@ -19,7 +19,7 @@ API_SCHEMA = {
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
-        'temperature': 0.0001
+        'temperature': 1 # 0.0001
     },
     'file_fields': ['mark_scheme'],
     'text_or_file_fields': ['submission']
@@ -74,4 +74,4 @@ def handle_feedback_request():
 if __name__ == '__main__':
     app.config['DEBUG'] = False
     # app.config['PROPAGATE_EXCEPTIONS'] = True
-    app.run(port=int(os.getenv('PORT', 5000))) #, debug=os.getenv('DEBUG', 'True').lower() == 'true')
+    app.run(port=int(os.getenv('PORT', 5000)), debug=os.getenv('DEBUG', 'True').lower() == 'true')

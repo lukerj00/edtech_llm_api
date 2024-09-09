@@ -5,7 +5,9 @@ from flask import Flask, request, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
-from openai_handler import OpenAIHandler
+###
+from openai_handler_lc import OpenAIHandler
+###
 from anthropic_handler import AnthropicHandler
 from utils import validate_input
 
@@ -19,7 +21,7 @@ API_SCHEMA = {
     'optional_fields': {
         'model': 'openai',
         'max_completion_tokens': 1000,
-        'temperature': 1 # 0.0001
+        'temperature': 0.0001,
     },
     'file_fields': ['mark_scheme'],
     'text_or_file_fields': ['submission']

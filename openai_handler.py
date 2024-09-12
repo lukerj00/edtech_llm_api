@@ -12,35 +12,37 @@ class OpenAIHandler:
         self.client = openai.OpenAI()
 
     def generate_feedback(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
-                          qualification: str, submission: str, mark_scheme: str, 
+                          qualification: str, feedback_category: str, assistant_id: str, thread_id: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
-        print('DEBUG temp=', temperature)
-        print('DEBUG ass_id=', assignment_id)
-        print('DEBUG q_id=', question_id)
-        try:
+        if not thread_id and not assistant_id:
             assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, mark_scheme, temperature)
             thread, submission = self._init_thread(submission, assistant.id, question_title, max_completion_tokens, temperature)
-            
-            feedback = []
-            for category, message in self._get_feedback_messages(qualification, subject).items():
-                run = self._create_and_poll_run(thread.id, assistant.id, message, max_completion_tokens, temperature)
-                print(f'{category} query status:', run.status)
-                output = self._get_run_output(thread.id, run.id)
-                print('output obtained', type(output), output)
-                formatted_output = self._format_category_output(output, category, submission)
-                print('formatted_output obtained:', type(formatted_output), formatted_output)
-                feedback.extend(formatted_output)
+            assistant_id, thread_id = assistant.id, thread.id
+        try:
+            # feedback = []
+            # for category, message in self._get_feedback_messages(qualification, subject).items():
+            message = self._get_category_message(feedback_category, qualification, subject)
+            run = self._create_and_poll_run(thread_id, assistant_id, message, max_completion_tokens, temperature)
+            print(f'{feedback_category} query status:', run.status)
+            output = self._get_run_output(thread_id, run.id)
+            print('output obtained', type(output), output)
+            formatted_output = self._format_category_output(output, feedback_category, submission)
+            print('formatted_output obtained:', type(formatted_output), formatted_output)
+            # feedback.extend(formatted_output)
 
-            print('returning feedback:', type(feedback))
+            print('returning feedback:', type(formatted_output))
             
             return {
                 "status": run.status, 
+                "assistant_id": assistant_id,
+                "thread_id": thread_id,
                 "submission": submission,
-                "feedback": feedback
+                "feedback": [formatted_output]
                 }
         
         except openai.OpenAIError as e:
             raise ValueError(f"OpenAI API error: {str(e)}")
+
 
     def _get_or_create_assistant(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                                  qualification: str, mark_scheme: str, temperature: float):
@@ -148,7 +150,7 @@ class OpenAIHandler:
             thread = self.client.beta.threads.create(messages=[initial_message])
         return thread, submission
 
-    def _get_feedback_messages(self, qualification: str, subject: str) -> Dict[str, Dict[str, str]]:
+    def _get_category_message(self, feedback_category: str, qualification: str, subject: str) -> Dict[str, Dict[str, str]]:
         return {
             "SPaG": {
                 'role': 'user',
@@ -184,7 +186,7 @@ class OpenAIHandler:
                 Give up to 3 comments, appropriate for a student of {qualification}-level {subject} and addressed in first person.
                 """,
             },
-        }
+        }[feedback_category]
 
     def _create_and_poll_run(self, thread_id: str, assistant_id: str, message: Dict[str, str], max_completion_tokens: int, temperature: float):
         self.client.beta.threads.messages.create(

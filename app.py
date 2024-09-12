@@ -8,10 +8,12 @@ from dotenv import load_dotenv
 from openai_handler import OpenAIHandler
 from anthropic_handler import AnthropicHandler
 from utils import validate_input
+from flask_cors import CORS
 
 load_dotenv()  # load env vars from .env file
 
 app = Flask(__name__)
+CORS(app, supports_credentials=True, origins="*")
 
 # API schema
 API_SCHEMA = {
@@ -34,6 +36,10 @@ limiter = Limiter(
 
 openai_handler = OpenAIHandler()
 anthropic_handler = AnthropicHandler()
+
+@app.route('/')
+def start():
+    return "Server is running !!"
 
 @app.route('/api/feedback', methods=['POST'])
 @limiter.limit("10 per minute")
@@ -70,8 +76,3 @@ def handle_feedback_request():
     except Exception as e:
         app.logger.error(f"Unexpected error: {str(e)}")
         return jsonify({"error": "An unexpected error occurred"}), 500
-
-if __name__ == '__main__':
-    app.config['DEBUG'] = False
-    # app.config['PROPAGATE_EXCEPTIONS'] = True
-    app.run(port=int(os.getenv('PORT', 5000)), debug=os.getenv('DEBUG', 'True').lower() == 'true')

@@ -7,7 +7,7 @@ import base64
 import mimetypes
 import json
 import re
-from pdf2image import convert_from_path
+import fitz 
 from PIL import Image
 
 class AnthropicHandler:
@@ -20,25 +20,24 @@ class AnthropicHandler:
                           qualification: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
         try:
-            print('temperature=',temperature)
             print('submission=',submission)
-            submission = self._get_submission_text(submission, max_completion_tokens, temperature)
+            submission = self._get_submission(submission, max_completion_tokens, temperature)
             print('submission processed, new submission =', submission)
             mark_scheme_payload = self._process_file(mark_scheme)
             print('mark scheme payload obtained')
-            messages = self._get_initials(assignment_title, question_title, subject, qualification, submission, mark_scheme_payload, max_completion_tokens)
+            messages = self._get_initial_messages(assignment_title, question_title, subject, qualification, submission, mark_scheme_payload, max_completion_tokens)
             print('initial messages obtained')
             # print('messages:', type(messages), len(messages), messages[-1])
             
             feedback = []
-            for category, input in self._get_feedbacks(qualification, subject).items():
-                messages += [input]
+            for category, input_message in self._get_feedback_messages(qualification, subject).items():
+                messages += [input_message]
                 # print('messages:', type(messages), len(messages), messages[-1])
-                output = self._get_run_output(messages, max_completion_tokens, temperature)
-                print('output:', type(output), output)
-                messages += [output]
-                print('output message type=',type(output),'category type=',type(category),'submission=',type(submission))
-                formatted_output = self._format_category_output(output, category, submission)
+                output_message = self._get_run_output(messages, max_completion_tokens, temperature)
+                print('output_message:', type(output_message), output_message)
+                messages += [output_message]
+                print('output message type=',type(output_message),'category type=',type(category),'submission=',type(submission))
+                formatted_output = self._format_category_output(output_message, category, submission)
                 # print('formatted_output:', type(formatted_output), formatted_output)
                 feedback.extend(formatted_output)
 
@@ -51,14 +50,14 @@ class AnthropicHandler:
         except anthropic.AnthropicError as e:
             raise ValueError(f"Anthropic API error: {str(e)}")
         
-    def _get_submission_text(self, submission: str, max_completion_tokens: int, temperature: int):
+    def _get_submission(self, submission: str, max_completion_tokens: int, temperature: int):
         # if submission and submission.startswith('@'):
         #     file_path = submission[1:]
         if os.path.isfile(submission): # file_path
             print('submission = file')
             try:
                 submission_payload = self._process_file(submission)
-                transcribe = [
+                transcribe_message = [
                     {
                         "role": "user",
                         "content": [
@@ -80,7 +79,7 @@ class AnthropicHandler:
                 ]
                 message = self.client.messages.create(
                     model="claude-3-5-sonnet-20240620",
-                    messages=transcribe,
+                    messages=transcribe_message,
                     max_tokens=max_completion_tokens,
                     temperature=temperature
                     )
@@ -99,12 +98,22 @@ class AnthropicHandler:
         file_extension = file_extension.lower()
         if file_extension in image_extensions:
             pass
+        # elif file_extension == '.pdf':
+        #     ms_name = os.path.splitext(os.path.basename(mark_scheme))[0]
+        #     images = convert_from_path(mark_scheme)
+        #     output_dir = os.path.dirname(mark_scheme)
+        #     mark_scheme = os.path.join(output_dir, f'{ms_name}.png')
+        #     images[0].save(mark_scheme, 'PNG')
         elif file_extension == '.pdf':
             ms_name = os.path.splitext(os.path.basename(mark_scheme))[0]
-            images = convert_from_path(mark_scheme)
+            doc = fitz.open(mark_scheme)
+            # Convert the first page of the PDF to an image
+            page = doc.load_page(0)
+            pix = page.get_pixmap()
             output_dir = os.path.dirname(mark_scheme)
             mark_scheme = os.path.join(output_dir, f'{ms_name}.png')
-            images[0].save(mark_scheme, 'PNG')
+            # Save the first page as an image
+            pix.save(mark_scheme)
         else:
             raise ValueError(f"Unsupported file type: {file_extension}")
         if not os.path.exists(mark_scheme):
@@ -121,7 +130,7 @@ class AnthropicHandler:
                 "data": base64_encoded
             }
         
-    def _get_initials(self, assignment_title: str, question_title: str, subject: str, qualification: str, submission: str, mark_scheme_payload: Dict[str, Any], max_completion_tokens: int):
+    def _get_initial_messages(self, assignment_title: str, question_title: str, subject: str, qualification: str, submission: str, mark_scheme_payload: Dict[str, Any], max_completion_tokens: int):
         instructions = {
             "role": "user",
             "content": [
@@ -183,7 +192,7 @@ class AnthropicHandler:
             }
         ]
 
-    def _get_feedbacks(self, qualification: str, subject: str) -> Dict[str, Dict[str, str]]:
+    def _get_feedback_messages(self, qualification: str, subject: str) -> Dict[str, Dict[str, str]]:
         return {
             "SPaG": {
                 "role": "user",
@@ -294,31 +303,21 @@ class AnthropicHandler:
         }            
             
     
-    def _format_category_output(self, output: str, category: str, submission: str) -> List[Dict[str, Any]]:
+    def _format_category_output(self, output_message, category, submission) -> List[Dict[str, Any]]:
         colour_dict = {
             "SPaG": "orange",
             "historical_accuracy": "blue",
             "overall_comments": "green",
             "marking": "purple",
         }
-        # # remove code block markers if present
-        # json_content = re.sub(r'```json\s*|\s*```', '', output.strip())
-        # # replace single quotes with double quotes for keys/string values
-        # json_content = re.sub(r'(^|[,{\[]\s*)\'(?=\S)|(?<=\S)\'(\s*[,}\]]|$)', '"', json_content)
-        # # remove trailing commas if present
-        # json_content = re.sub(r',\s*}', '}', json_content)
-        # json_content = re.sub(r',\s*]', ']', json_content)
-        json_content = output["content"][0].text
         try:
-            data = json.loads(json_content)
+            data = json.loads(output_message["content"][0].text)
         except json.JSONDecodeError as e:
             print(f"JSON Decode Error: {e}")
-            print(f"Problematic JSON content: {json_content}")
-
-            # if parsing fails try  ast.literal_eval as a fallback
+            print(f"Problematic JSON content: {output_message}")
             try:
                 import ast
-                data = ast.literal_eval(json_content)
+                data = ast.literal_eval(output_message)
             except:
                 print("Failed to parse JSON.")
                 return None
@@ -346,10 +345,11 @@ class AnthropicHandler:
                     incorrect_response, correct_response = parts
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
+                    # print('incorrect_resp=',incorrect_response,'repr sub =', repr(submission))
                     match_indices = find_matches(incorrect_response, submission)
                     start_indices, end_indices = zip(*match_indices) if match_indices else ([], []) 
-                    print("highlighted_word=",submission[start_indices[0]:end_indices[0]])
-                    print("index_zero=",submission[start_indices[0]])
+                    # start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE | re.DOTALL)]
+                    # end_indices = [ind + len(incorrect_response) for ind in start_indices]
                     
                     response_data.append({
                         'category': category,
@@ -396,11 +396,9 @@ def find_matches(incorrect_response, submission):
     matches = list(re.finditer(pattern, submission_repr, re.IGNORECASE | re.DOTALL))
 
     # Extract start and end indices
-    indices = [(match.start()+1, match.end()) for match in matches]
+    indices = [(match.start(), match.end()) for match in matches]
 
     return indices
-
-###
     
 # def normalize_text(text):
 #     return re.sub(r'\s+', ' ', text.strip())

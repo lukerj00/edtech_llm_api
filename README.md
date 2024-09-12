@@ -28,6 +28,7 @@ Send a POST request to `/api/feedback` with the following form data:
 | `qualification`   | `string`       | Yes      | Qualification level (e.g., 'GCSE')                                  |
 | `submission`      | `string` or `file` | Yes  | Student's submission, can be either text string or file specifier (but only text for anthropic at the moment) |
 | `mark_scheme`     | `file`         | Yes      | Mark scheme file                                                    |
+| `feedback_category` | `string`      | Yes      | Currently this must be one of {'SPaG', 'historical_accuracy', 'overall_comments', 'marking'} |
 
 ### Optional Fields
 
@@ -36,6 +37,8 @@ Send a POST request to `/api/feedback` with the following form data:
 | `model`               | `string` | No       | LLM model to use. Currently both OpenAI ("openai") and Anthropic ("anthropic") are available (default: "openai")         |
 | `max_completion_tokens` | `integer`| No      | Maximum tokens for LLM response. May fail if this is set too low due to JSON parsing errors (default: 1000) |
 | `temperature`         | `float`  | No       | LLM temperature setting. Should mostly be kept at 0 but left optional for tinkering (default: 0) |
+| `assistant_id`        | `string` | No       | Note this should be EMPTY for the first query but MUST BE FILLED OUT for any subsequent queries (after being returned following the first request). This prevents unnecessary extra assistants and threads being created for additional queries, slowing the API |
+| `thread_id`           | `string` | No       | Same as above                                                          |
 
 Note that the only file type supported at the moment is PDF, but image/other file support may be implemented later.
 
@@ -45,8 +48,14 @@ Example cURL request (see example_files):
 curl -X POST 'http://127.0.0.1:5000/api/feedback' -H 'Content-Type: multipart/form-data' -F 'assignment_id=123' -F 'assignment_title=Explain two consequences of the Soviet invasion of Afghanistan' -F 'subject=history' -F 'qualification=GCSE' -F 'submission=@example_files/example-submission.pdf' -F 'model=openai' -F 'mark_scheme=@example_files/example-ms.pdf'
 ```
 
-The API will return a JSON response with feedback categorized into SPaG (Spelling, Punctuation and Grammar), historical accuracy, overall comments, and marking, eg:
-
+The API will return a JSON response of a SINGLE feedback object, according to the request category consisting (at present) of one of SPaG (Spelling, Punctuation and Grammar), historical accuracy, overall comments, or marking. The response has format:
+{
+                "status": run.status, 
+                "assistant_id": assistant_id,
+                "thread_id": thread_id,
+                "submission": submission,
+                "feedback": [formatted_output]
+}, where formatted_output has an example form:
 {
     "category": "SPaG",
     "citations": null,
@@ -55,13 +64,15 @@ The API will return a JSON response with feedback categorized into SPaG (Spellin
     "end": [
         1070
     ],
-    "incorrect": "critisicm",
+    "incorrect_or_highlight": "critisicm",
     "start": [
         1061
     ]
 }
 
-Each feedback group has output formatted slightly differently (eg different fields may be null) depending on its intended use on frontend.
+Note that the response contains both `assistant_id` and `thread_id`. These values should be empty/null within first feedback request for an assignment, but after a response is received containing values for these parameters, these returned values should then be fed back as request parameters to the API on subsequent requests, to prevent duplication and slowdowns. Note this will have to be backend logic but should be simple to implement.
+
+This new request/response version is currently ONLY WORKING WITH OPENAI, so do not use it with model="anthropic" yet.
 
 The API is still in development, so there are some missing features:
 - Other model options, eg anthropic's claude

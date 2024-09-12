@@ -17,8 +17,10 @@ CORS(app, supports_credentials=True, origins="*")
 
 # API schema
 API_SCHEMA = {
-    'required_fields': ['assignment_id', 'assignment_title', 'question_id', 'question_title', 'subject', 'qualification'],
+    'required_fields': ['assignment_id', 'assignment_title', 'question_id', 'question_title', 'subject', 'qualification', 'feedback_category'],
     'optional_fields': {
+        'assistant_id': None,
+        'thread_id': None,
         'model': 'openai',
         'max_completion_tokens': 1000,
         'temperature': 0.0001
@@ -62,6 +64,9 @@ def handle_feedback_request():
             question_title=data['question_title'],
             subject=data['subject'],
             qualification=data['qualification'],
+            feedback_category=data['feedback_category'],
+            assistant_id=data['assistant_id'],
+            thread_id=data['thread_id'],
             submission=data['submission'],
             mark_scheme=data['mark_scheme'],
             max_completion_tokens=data['max_completion_tokens'],

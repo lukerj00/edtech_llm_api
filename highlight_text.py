@@ -73,200 +73,172 @@ def highlight_text(json_feedback):
 # example usage
 json_feedback = r'''
 {
+    "assistant_id": "asst_IVwvBg8sUi55Op1ZZvqGTTvf",
     "feedback": [
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "Afghanistan",
+            "correct_or_feedback": "important",
             "end": [
-                114,
-                387,
-                605,
-                740
+                42
             ],
-            "incorrect_or_highlight": "Afganistan",
+            "incorrect_or_highlight": "importent",
             "start": [
-                104,
-                377,
-                595,
-                730
+                33
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "Mujahideen",
+            "correct_or_feedback": "were run",
             "end": [
+                191
+            ],
+            "incorrect_or_highlight": "was run",
+            "start": [
+                184
+            ]
+        },
+        {
+            "category": "SPaG",
+            "citations": null,
+            "colour": "orange",
+            "correct_or_feedback": "policies",
+            "end": [
+                224
+            ],
+            "incorrect_or_highlight": "policys",
+            "start": [
                 217
-            ],
-            "incorrect_or_highlight": "Mujahidene",
-            "start": [
-                207
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "discontent",
+            "correct_or_feedback": "free speech",
             "end": [
-                993
+                295
             ],
-            "incorrect_or_highlight": "disscontent",
+            "incorrect_or_highlight": "free speach",
             "start": [
-                982
+                284
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "criticism",
+            "correct_or_feedback": "reducing",
             "end": [
-                1133
+                309
             ],
-            "incorrect_or_highlight": "critisicm",
+            "incorrect_or_highlight": "reduceing",
             "start": [
-                1124
+                300
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "dissatisfaction",
+            "correct_or_feedback": "these changes",
             "end": [
-                1199
+                389
             ],
-            "incorrect_or_highlight": "disatisfaction",
+            "incorrect_or_highlight": "this changes",
             "start": [
-                1185
+                377
             ]
         },
         {
             "category": "SPaG",
             "citations": null,
             "colour": "orange",
-            "correct_or_feedback": "This financial drain and public dissatisfaction significantly weakened",
+            "correct_or_feedback": "controlled",
             "end": [
-                1226
+                435
             ],
-            "incorrect_or_highlight": "This financial drain and public disatisfaction was significantly weakened",
+            "incorrect_or_highlight": "controled",
             "start": [
-                1153
+                426
             ]
         },
         {
-            "category": "historical_accuracy",
+            "category": "SPaG",
             "citations": null,
-            "colour": "blue",
-            "correct_or_feedback": "The USA got involved, supporting the Afghan Mujahideen through Operation Cyclone, which included sending weapons and financial aid to fight the Soviets",
+            "colour": "orange",
+            "correct_or_feedback": "going too far",
             "end": [
-                280
+                527
             ],
-            "incorrect_or_highlight": "The USA got involved, supporting the Afgan Mujahidene by sending them weapons and financial aid to fight the Soviets",
+            "incorrect_or_highlight": "going to far",
             "start": [
-                164
+                515
             ]
         },
         {
-            "category": "historical_accuracy",
+            "category": "SPaG",
             "citations": null,
-            "colour": "blue",
-            "correct_or_feedback": "This strategy by the USA, which intended to weaken Soviet influence, contributed to a prolonged war in Afghanistan, causing extensive suffering and chaos, and had long-term consequences for the region's stability",
+            "colour": "orange",
+            "correct_or_feedback": "countries",
             "end": [
-                644
+                559,
+                653
             ],
-            "incorrect_or_highlight": "It's seen that this strategy by the USA, which intended to weaken Soviet influence, led to a prolonged war in Afganistan, causing extensive suffering and chaos",
+            "incorrect_or_highlight": "countrys",
             "start": [
-                485
+                551,
+                645
             ]
         },
         {
-            "category": "historical_accuracy",
+            "category": "SPaG",
             "citations": null,
-            "colour": "blue",
-            "correct_or_feedback": "The Soviet Union spent an estimated 50 billion rubles (equivalent to $50 billion USD at the time) on the war, which severely strained their already struggling economy",
+            "colour": "orange",
+            "correct_or_feedback": "countries",
             "end": [
-                890
+                559,
+                653
             ],
-            "incorrect_or_highlight": "Billions of dollars was poured into the military campaign, and the Soviet economy, which was not very strong to begin with, faced even more pressure",
+            "incorrect_or_highlight": "countrys",
             "start": [
-                742
+                551,
+                645
             ]
         },
         {
-            "category": "historical_accuracy",
+            "category": "SPaG",
             "citations": null,
-            "colour": "blue",
-            "correct_or_feedback": "This financial drain and public dissatisfaction significantly weakened the Soviet Union's economic and political stability, contributing to its eventual decline and collapse in 1991",
+            "colour": "orange",
+            "correct_or_feedback": "keep control. This invasion",
             "end": [
-                1329
+                761
             ],
-            "incorrect_or_highlight": "This financial drain and public disatisfaction was significantly weakened the Soviet Union's economic and political stability, contributing to its eventual decline and collapse",
+            "incorrect_or_highlight": "keep control This invasion",
             "start": [
-                1153
+                735
             ]
         },
         {
-            "category": "overall_comments",
+            "category": "SPaG",
             "citations": null,
-            "colour": "green",
-            "correct_or_feedback": "You've done a good job identifying two significant consequences of the Soviet invasion of Afghanistan. Your answer demonstrates a clear understanding of the impact on both international relations and the Soviet economy",
-            "end": null,
-            "incorrect_or_highlight": null,
-            "start": null
-        },
-        {
-            "category": "overall_comments",
-            "citations": null,
-            "colour": "green",
-            "correct_or_feedback": "To improve your answer, try to include more specific dates and figures where possible. For example, mentioning the exact year the Soviet Union collapsed (1991) would strengthen your argument",
-            "end": null,
-            "incorrect_or_highlight": null,
-            "start": null
-        },
-        {
-            "category": "overall_comments",
-            "citations": null,
-            "colour": "green",
-            "correct_or_feedback": "Consider expanding on the long-term consequences of the invasion, such as its impact on the balance of power in the region and its role in the end of the Cold War. This would demonstrate a deeper understanding of the historical significance of the event",
-            "end": null,
-            "incorrect_or_highlight": null,
-            "start": null
-        },
-        {
-            "category": "marking",
-            "citations": null,
-            "colour": "purple",
-            "correct_or_feedback": "Your answer demonstrates features of the period and analyzes two consequences, showing good knowledge and understanding. This aligns with Level 2 (3-4 marks) in the mark scheme",
-            "end": null,
-            "incorrect_or_highlight": null,
-            "start": null
-        },
-        {
-            "category": "marking",
-            "citations": null,
-            "colour": "purple",
-            "correct_or_feedback": "You've provided specific information about the topic to support your explanation, such as the USA's support for the Mujahideen and the economic strain on the Soviet Union. This further supports a Level 2 assessment",
-            "end": null,
-            "incorrect_or_highlight": null,
-            "start": null
-        },
-        {
-            "category": "marking",
-            "citations": null,
-            "colour": "purple",
-            "correct_or_feedback": "Based on the quality of your analysis and the specific information provided, I would award your answer 7 out of 8 marks (4 marks for each consequence). To achieve full marks, consider including more precise dates and figures, and explicitly linking your points to the end of the Cold War",
-            "end": null,
-            "incorrect_or_highlight": null,
-            "start": null
+            "colour": "orange",
+            "correct_or_feedback": "its satellite states",
+            "end": [
+                986
+            ],
+            "incorrect_or_highlight": "it's satellite states",
+            "start": [
+                965
+            ]
         }
     ],
     "status": "completed",
-    "submission": "Explain two consequences of the Soviet invasion of Afghanistan\n\nIn 1979, the Soviet Union's invasion of Afganistan seriously escalated\nCold War tensions even more. The USA got involved, supporting the\nAfgan Mujahidene by sending them weapons and financial aid to fight\nthe Soviets. This American support aimed to counter Soviet expansion,\nbut actually, it made the conflict in Afganistan much worse and more\ndrawn out, lasting until 1989 and creating a lot of instability in the area.\nIt's seen that this strategy by the USA, which intended to weaken\nSoviet influence, led to a prolonged war in Afganistan, causing\nextensive suffering and chaos.\n\nOn the economic side, the Soviet Union felt a massive strain because of\nthe war in Afganistan. Billions of dollars was poured into the military\ncampaign, and the Soviet economy, which was not very strong to begin\nwith, faced even more pressure. This was exacerbated by US economic\nsanctions. As war dragged on without a clear victory, disscontent grew\nwithin the Soviet Union. People began questioning the purpose and the\nhigh cost of continuing the war, leading to widespread critisicm of the\ngovernment. This financial drain and public disatisfaction was\nsignificantly weakened the Soviet Union's economic and political\nstability, contributing to its eventual decline and collapse."
+    "submission": "The Prague Spring of 1968 was an importent event in Czechoslovakia. It started when Alexander Dubček became the leader of the country. He wanted to make some changes to the way things was run. \\nDubček introduced new policys that gave people more freedom. This included allowing more free speach and reduceing government control. Many people in Czechoslovakia were happy about this changes. \\nHowever, the Soviet Union, which controled Czechoslovakia at the time, didn't like these reforms. They thought Dubček was going to far and worried that other countrys might want similar changes. \\nIn August 1968, the Soviet Union and other Warsaw Pact countrys sent tanks and soldiers into Czechoslovakia. They wanted to stop the reforms and keep control This invasion ended the Prague Spring. \\nAfter the invasion, Dubček was removed from power. The reforms were reversed, and Soviet control was tightend again. This event showed how much power the Soviet Union had over it's satellite states during the Cold War.",
+    "thread_id": "thread_fjvTggvmyemdHWdCN8GXsAcH"
 }
 '''
 highlight_text(json_feedback)

@@ -38,7 +38,7 @@ class OpenAIHandler:
                 "assistant_id": assistant_id,
                 "thread_id": thread_id,
                 "submission": submission,
-                "feedback": [formatted_output]
+                "feedback": formatted_output
                 }
         
         except openai.OpenAIError as e:

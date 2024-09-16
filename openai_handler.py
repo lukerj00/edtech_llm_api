@@ -265,17 +265,17 @@ class OpenAIHandler:
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
                     start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                    end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
-                    
-                    response_data.append({
-                        'category': category,
-                        'incorrect_or_highlight': incorrect_response,
-                        'correct_or_feedback': correct_response,
-                        'citations': citations,
-                        'start': start_indices,
-                        'end': end_indices,
-                        'colour': colour_dict.get(category),
-                    })
+                    end_indices = [ind + len(incorrect_response) for ind in start_indices]    
+                    for start_index, end_index in zip(start_indices, end_indices):            
+                        response_data.append({
+                            'category': category,
+                            'incorrect_or_highlight': incorrect_response,
+                            'correct_or_feedback': correct_response,
+                            'citations': citations,
+                            'start': start_index,
+                            'end': end_index,
+                            'colour': colour_dict.get(category),
+                        })
                 else:
                     print(f"Warning: LLM output correction '{bullet}' does not contain ' -> ' character")
             

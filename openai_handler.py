@@ -14,6 +14,7 @@ class OpenAIHandler:
     def generate_feedback(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                           qualification: str, feedback_category: str, assistant_id: str, thread_id: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
+        if not
         
         if not thread_id and not assistant_id:
             assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, mark_scheme, temperature)
@@ -266,17 +267,17 @@ class OpenAIHandler:
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
                     start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                    end_indices = [ind + len(incorrect_response) for ind in start_indices]                 
-                    
-                    response_data.append({
-                        'category': category,
-                        'incorrect_or_highlight': incorrect_response,
-                        'correct_or_feedback': correct_response,
-                        'citations': citations,
-                        'start': start_indices,
-                        'end': end_indices,
-                        'colour': colour_dict.get(category),
-                    })
+                    end_indices = [ind + len(incorrect_response) for ind in start_indices]    
+                    for start_index, end_index in zip(start_indices, end_indices):            
+                        response_data.append({
+                            'category': category,
+                            'incorrect_or_highlight': incorrect_response,
+                            'correct_or_feedback': correct_response,
+                            'citations': citations,
+                            'start': start_index,
+                            'end': end_index,
+                            'colour': colour_dict.get(category),
+                        })
                 else:
                     print(f"Warning: LLM output correction '{bullet}' does not contain ' -> ' character")
             

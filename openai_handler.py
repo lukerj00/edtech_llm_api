@@ -14,7 +14,6 @@ class OpenAIHandler:
     def generate_feedback(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
                           qualification: str, feedback_category: str, assistant_id: str, thread_id: str, submission: str, mark_scheme: str, 
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
-        if not
         
         if not thread_id and not assistant_id:
             assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, mark_scheme, temperature)

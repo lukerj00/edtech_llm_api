@@ -247,6 +247,7 @@ class OpenAIHandler:
         bullets = data[json_key]
         # print('bullets=', bullets)
         response_data = []
+        unique_parts = set()
         for bullet in bullets:
             bullet = bullet.strip('- ').strip()
 
@@ -259,32 +260,41 @@ class OpenAIHandler:
                 citations = None
             
             # assemble JSON response for each bullet, noting categories are handled differently based on if the output must be split into parts
-            if category in ['SPaG', 'historical_accuracy']:
+            if category in ['SPaG', 'historical_accuracy']:###
                 parts = re.split(r' -> ', bullet, maxsplit=1)
+                
                 if len(parts) == 2:
                     incorrect_response, correct_response = parts
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
-                    start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                    end_indices = [ind + len(incorrect_response) for ind in start_indices]   
-                    unique_pairs = set()
-                    for start_index, end_index in zip(start_indices, end_indices):  
-                        pair = (start_index, end_index)
-                        if pair not in unique_pairs:
-                            unique_pairs.add(pair)          
-                            response_data.append({
-                                'category': category,
-                                'incorrect_or_highlight': incorrect_response,
-                                'correct_or_feedback': correct_response,
-                                'citations': citations,
-                                'start': pair[0],
-                                'end': pair[1],
-                                'colour': colour_dict.get(category),
-                            })
+                    parts = (incorrect_response, correct_response)
+                    if parts not in unique_parts:
+                        print(parts, 'not in unique_parts')
+                        unique_parts.add(parts)
+                        start_indices = [match.start() for match in re.finditer(re.escape(parts[0]), submission, re.IGNORECASE)]
+                        end_indices = [ind + len(parts[0]) for ind in start_indices]   
+                        unique_pairs = set()
+                        for start_index, end_index in zip(start_indices, end_indices):  
+                            pair = (start_index, end_index)
+                            if pair not in unique_pairs:
+                                unique_pairs.add(pair)          
+                                response_data.append({
+                                    'category': category,
+                                    'incorrect_or_highlight': parts[0],
+                                    'correct_or_feedback': parts[1],
+                                    'citations': citations,
+                                    'start': pair[0],
+                                    'end': pair[1],
+                                    'colour': colour_dict.get(category),
+                                })
+                            else:
+                                print(pair, 'already in unique_pairs')
+                    else:
+                        print(parts, 'already in unique_parts')
                 else:
                     print(f"Warning: LLM output correction '{bullet}' does not contain ' -> ' character")
             
-            elif category in ['marking', 'overall_comments']:
+            elif category in ['marking', 'overall_comments']:###
                 bullet = bullet.strip().strip('`').strip('...')
                 response_data.append({
                     'category': category,

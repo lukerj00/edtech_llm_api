@@ -16,7 +16,7 @@ class OpenAIHandler:
                           max_completion_tokens: int, temperature: float) -> Dict[str, Any]:
         
         if not thread_id and not assistant_id:
-            assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, mark_scheme, temperature)
+            assistant = self._get_or_create_assistant(assignment_id, assignment_title, question_id, question_title, subject, qualification, feedback_category, mark_scheme, temperature)
             thread, submission = self._init_thread(submission, assistant.id, question_title, max_completion_tokens, temperature)
             assistant_id, thread_id = assistant.id, thread.id
         try:
@@ -46,8 +46,8 @@ class OpenAIHandler:
 
 
     def _get_or_create_assistant(self, assignment_id: str, assignment_title: str, question_id: str, question_title: str, subject: str, 
-                                 qualification: str, mark_scheme: str, temperature: float):
-        assistant_name = f"marking-assistant-a{assignment_id}-q{question_id}"
+                                 qualification: str, feedback_category: str, mark_scheme: str, temperature: float):
+        assistant_name = f"marking-assistant-a{assignment_id}-q{question_id}-c{feedback_category}"
         if os.path.isfile(mark_scheme):
             print('ms = file')
         else:
@@ -266,17 +266,21 @@ class OpenAIHandler:
                     incorrect_response = incorrect_response.strip().strip('`').strip('...').strip("'")
                     correct_response = correct_response.strip().strip('`').strip('...').strip("'")
                     start_indices = [match.start() for match in re.finditer(re.escape(incorrect_response), submission, re.IGNORECASE)]
-                    end_indices = [ind + len(incorrect_response) for ind in start_indices]    
-                    for start_index, end_index in zip(start_indices, end_indices):            
-                        response_data.append({
-                            'category': category,
-                            'incorrect_or_highlight': incorrect_response,
-                            'correct_or_feedback': correct_response,
-                            'citations': citations,
-                            'start': start_index,
-                            'end': end_index,
-                            'colour': colour_dict.get(category),
-                        })
+                    end_indices = [ind + len(incorrect_response) for ind in start_indices]   
+                    unique_pairs = set()
+                    for start_index, end_index in zip(start_indices, end_indices):  
+                        pair = (start_index, end_index)
+                        if pair not in unique_pairs:
+                            unique_pairs.add(pair)          
+                            response_data.append({
+                                'category': category,
+                                'incorrect_or_highlight': incorrect_response,
+                                'correct_or_feedback': correct_response,
+                                'citations': citations,
+                                'start': pair[0],
+                                'end': pair[1],
+                                'colour': colour_dict.get(category),
+                            })
                 else:
                     print(f"Warning: LLM output correction '{bullet}' does not contain ' -> ' character")
             

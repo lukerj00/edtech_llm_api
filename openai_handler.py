@@ -215,10 +215,10 @@ class OpenAIHandler:
 
     def _format_category_output(self, output: str, category: str, submission: str) -> List[Dict[str, Any]]:
         colour_dict = {
-            "SPaG": "orange",
-            "historical_accuracy": "blue",
-            "overall_comments": "green",
-            "marking": "purple",
+            "SPaG": ["FFBF00", "EC4E02"],
+            "historical_accuracy": ["02FFFF", "163E64"],
+            "overall_comments": ["02FF5A", "12501B"],
+            "marking": ["FF4CFE", "501649"],
         }
         # remove code block markers if present
         json_content = re.sub(r'```json\s*|\s*```', '', output.strip())
@@ -285,7 +285,8 @@ class OpenAIHandler:
                                     'citations': citations,
                                     'start': pair[0],
                                     'end': pair[1],
-                                    'colour': colour_dict.get(category),
+                                    'background_colour': colour_dict.get(category)[0],
+                                    'text_colour': colour_dict.get(category)[1],
                                 })
                             else:
                                 print(pair, 'already in unique_pairs')
